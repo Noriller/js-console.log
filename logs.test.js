@@ -8,15 +8,25 @@
 */
 
 describe('Printing "Hello World" 50 times', () => {
-  beforeEach(() => jest.spyOn(console, console.log.name));
+  const logMock = jest.fn();
 
   afterEach(() => {
     Expect50Logs();
     jest.restoreAllMocks();
+    jest.resetAllMocks();
   });
 
   test('Brute force', () => {
-    Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log(); Log();
+    Log(); Log(); Log(); Log(); Log();
+    Log(); Log(); Log(); Log(); Log();
+    Log(); Log(); Log(); Log(); Log();
+    Log(); Log(); Log(); Log(); Log();
+    Log(); Log(); Log(); Log(); Log();
+    Log(); Log(); Log(); Log(); Log();
+    Log(); Log(); Log(); Log(); Log();
+    Log(); Log(); Log(); Log(); Log();
+    Log(); Log(); Log(); Log(); Log();
+    Log(); Log(); Log(); Log(); Log();
   });
 
   test('The For Loop', () => {
@@ -217,13 +227,38 @@ describe('Printing "Hello World" 50 times', () => {
     jest.runAllTimers();
   });
 
+  test('console.table', () => {
+    // Thanks: https://amy-blankenship.medium.com/
+    // For the idea of using console.table to print in the console 50 times
+    // See comment in: https://medium.com/@noriller/in-how-many-ways-can-you-print-in-the-console-50-times-javascript-1f863c670078
+
+    // Create an object with a property that will call the log
+    const log = () => ({
+      get log() {
+        return Log();
+      }
+    });
+
+    /**
+     * console.table will call the properties as it prints them
+     * but apparently, `console.table` counts (or maybe calls under the hood)
+     * `console.log`! So, I had to refactor how I "count" the logs.
+     */
+    console.table(
+      Array.from({ length: 50 })
+        .map(log),
+      // in this case this is optional
+      ['log']
+    );
+  });
+
+  function Log() {
+    return logMock.mockImplementation(
+      () => console.log("Hello World!")
+    )();
+  }
+
+  function Expect50Logs() {
+    expect(logMock).toHaveBeenCalledTimes(50);
+  }
 });
-
-function Expect50Logs() {
-  expect(console.log).toHaveBeenCalledTimes(50);
-}
-
-function Log() {
-  console.log("Hello World!");
-}
-
